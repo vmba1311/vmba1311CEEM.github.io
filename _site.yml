@@ -1,0 +1,9 @@
+name: "Centro de Estudios Economía de Madrid"
+output_dir: "."
+navbar:
+  title: "CEEM"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Coronavirus"
+      href: coronavirus.html

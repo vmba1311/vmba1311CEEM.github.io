@@ -1,0 +1,441 @@
+---
+title: "Coronavirus en España"
+author: "Centro de Estudios Economía de Madrid"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    # social: ["facebook", "twitter", "linkedin"]
+    source_code: embed
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+#------------------ Packages ------------------
+library(flexdashboard)
+
+`%>%` <- magrittr::`%>%`
+#------------------ Parameters ------------------
+# Set colors
+# https://www.w3.org/TR/css-color-3/#svg-color
+confirmed_color <- "purple"
+active_color <- "#1f77b4"
+recovered_color <- "forestgreen"
+death_color <- "red"
+#------------------ Data ------------------
+#these libraries need to be loaded
+library(utils)
+library('dplyr')
+
+#read the Dataset sheet into “R”. The dataset will be called "data".
+datos <- read.csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv
+", na.strings = "", fileEncoding = "UTF-8-BOM")
+datos$date <- format(as.Date(datos$date, format = "%d/%m/%Y"), "%Y-%m-%d")
+df_daily <- datos %>%
+filter(countriesAndTerritories=="Spain") %>% 
+  dplyr::arrange(date) %>% 
+  filter(date > "2020-02-24") %>%
+  dplyr::mutate(
+    casos_cum = cumsum(cases),
+    death_cum = cumsum(deaths),
+  ) 
+
+df1 <- df_daily %>% dplyr::filter(date == max(date))
+
+
+#read the Dataset sheet into “R”.
+library("readxl")
+library(tidyverse)
+datosnombres <- read_excel("ccaanombre.xlsX")
+datospoblacion <- read_excel("poblacion.xlsx")
+datosccaa <- read.csv("https://covid19.isciii.es/resources/serie_historica_acumulados.csv")
+datosccaa <- datosccaa[-c(989),]
+datosccaa <- datosccaa[-c(990),]
+datosccaa <- datosccaa[-c(991),]
+datostotal <- merge(datosccaa,datosnombres,by.x="CCAA",by.y="ccaa")
+datostotall <- merge(datostotal,datospoblacion,by.x="CCAA",by.y="ccaa")
+names(datostotall)[2]<-paste("date")
+datostotall$date <- format(as.Date(datostotall$date, format = "%d/%m/%Y"), "%Y-%m-%d")
+
+#datostotal$date <- strptime(as.character(datostotal$date), "%d/%m/%Y")
+m <- datostotall
+d <- as.data.frame(m)
+datostotall[is.na(d)] <- 0 
+dfccaa <- datostotall %>%
+  # dplyr::filter(date == max(date)) %>%
+  #dplyr::filter(Country.Region == "Spain") %>%
+  dplyr::arrange(CCAA,date) %>%
+  dplyr::group_by(CCAA) %>%
+  dplyr::mutate(
+    casos_cum = cumsum(CASOS),
+    death_cum = cumsum(Fallecidos),
+    hosp_cum= cumsum(Hospitalizados),
+    recup_cum=cumsum(Recuperados),
+  ) %>%
+  dplyr::ungroup() 
+
+
+  
+dfccaata <- dfccaa %>%
+dplyr::filter(date == max(date)) %>%
+select(posicion, nombreccaa, CASOS, casos_cum, Fallecidos, death_cum, Hospitalizados, Recuperados, recup_cum, UCI) %>%
+dplyr::arrange(posicion) %>%
+select(nombreccaa, CASOS, casos_cum, Fallecidos, death_cum, Hospitalizados, Recuperados, recup_cum, UCI)
+names(dfccaata)[1]<-paste("CCAA")
+names(dfccaata)[2]<-paste("Confirmados (últimas 24h)")
+names(dfccaata)[3]<-paste("Confirmados acumulados")
+names(dfccaata)[4]<-paste("Fallecidos (últimas 24h)")
+names(dfccaata)[5]<-paste("Fallecidos acumulados")
+names(dfccaata)[6]<-paste("Hospitalizados (últimas 24h)")
+names(dfccaata)[7]<-paste("Recuperados (últimas 24h)")
+names(dfccaata)[8]<-paste("Recuperados acumulados")
+names(dfccaata)[9]<-paste("UCI")
+
+dfccaatag <- dfccaa %>%
+dplyr::filter(date == max(date)) %>%
+select(posicion, nombreccaa, casos_cum, death_cum, poblacion) %>%
+dplyr::arrange(posicion) %>%
+select(posicion, nombreccaa, casos_cum, death_cum, poblacion)
+dfccaatag$casos_cump <- dfccaatag$casos_cum/(dfccaatag$poblacion/10000)
+dfccaatag$death_cump <- dfccaatag$death_cum/(dfccaatag$poblacion/10000)
+
+
+
+
+
+
+```
+
+España
+=======================================================================
+
+Row {data-width=400}
+-----------------------------------------------------------------------
+
+### confirmed {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(sum(df_daily$cases), big.mark = ","), "", sep = " "),
+  caption = "Total casos confirmados",
+  icon = "fas fa-user-md",
+  color = confirmed_color
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### death {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(sum(df_daily$deaths, na.rm = TRUE), big.mark = ","), " (",
+    round(100 * sum(df_daily$deaths, na.rm = TRUE) / sum(df_daily$cases), 1),
+    "%)",
+    sep = ""
+  ),
+  caption = "Total fallecidos (tasa de mortalidad)",
+  icon = "fas fa-heart-broken",
+  color = death_color
+)
+```
+
+
+### confirmed24 {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(df1$cases, big.mark = ","), "", sep = " "),
+  caption = "Casos confirmados últimas 24 horas",
+  icon = "fas fa-user-md",
+  color = confirmed_color
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### death24 {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(df1$deaths, big.mark = ","), "", sep = " "),
+  caption = "Fallecidos últimas 24 horas",
+  icon = "fas fa-heart-broken",
+  color = death_color
+)
+```
+
+Column {data-width=400}
+-------------------------------------
+
+### **Número de casos confirmados, datos acumulados** (España)
+
+```{r}
+plotly::plot_ly(data = df_daily) %>%
+  plotly::add_trace(
+    x = ~date,
+    # y = ~active_cum,
+    y = ~casos_cum,
+    type = "scatter",
+    mode = "lines+markers",
+    # name = "Active",
+    name = "casos confirmados",
+    line = list(color = active_color),
+    marker = list(color = active_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "Nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de casos confirmados"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+### **Número de personas fallecidas, datos acumulados** (España)
+
+```{r}
+plotly::plot_ly(data = df_daily) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~death_cum,
+    type = "scatter",
+    mode = "lines+markers",
+    name = "Fallecidos",
+    line = list(color = death_color),
+    marker = list(color = death_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de fallecidos"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+Column {data-width=400}
+-------------------------------------
+
+### **Casos confirmados diarios** (España)
+
+```{r}
+plotly::plot_ly(data = df_daily) %>%
+  plotly::add_trace(
+    x = ~date,
+    # y = ~active_cum,
+    y = ~cases,
+    type = "bar",
+    #mode = "lines+markers",
+    # name = "Active",
+    name = "casos confirmados",
+    #bar = list(color = active_color),
+    marker = list(color = active_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "Nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de casos confirmados"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+### **Número de personas fallecidas** (España)
+
+```{r}
+plotly::plot_ly(data = df_daily) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~deaths,
+    type = "bar",
+    #mode = "bar",
+    name = "Fallecidos",
+    #line = list(color = death_color),
+    marker = list(color = death_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de fallecidos"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+Comunidades Autónomas
+=======================================================================
+
+Row {data-width=600}
+-------------------------------------
+
+### **Situación de COVID-19 por CCAA** 
+
+```{r}
+library(data.table)
+library(dplyr)
+library(formattable)
+library(tidyr)
+formattable(dfccaata, 
+            align =c("l","c","c","c","c", "c", "c", "c", "c"), 
+            list(`Indicator Name` = formatter(
+              "span", style = ~ style(color = "grey",font.weight = "bold"))
+))
+```
+
+
+Column {data-width=600}
+-------------------------------------
+
+
+### **Casos confirmados por cada 10.000 hab.** 
+
+```{r}
+dfccaatag <- dfccaatag %>%
+dplyr::arrange(casos_cump)
+
+plotly::plot_ly(data = dfccaatag) %>%
+  plotly::add_trace(
+    x = ~casos_cump,
+    y = ~nombreccaa,
+    type = "bar",
+    orientation = 'h',
+    #mode = "bar",
+    name = "Confirmados",
+    #line = list(color = death_color),
+    marker = list(color = active_color)
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$casos_cump), 
+    #yaxis = list(title = "CCAA"),
+    xaxis = list(title = "Confirmados"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+### **Fallecidos por cada 10.000 hab.** 
+
+
+```{r}
+dfccaatag <- dfccaatag %>%
+dplyr::arrange(death_cump)
+
+plotly::plot_ly(data = dfccaatag) %>%
+  plotly::add_trace(
+    x = ~death_cump,
+    y = ~nombreccaa,
+    type = "bar",
+    orientation = 'h',
+    #mode = "bar",
+    name = "Confirmados",
+    #line = list(color = death_color),
+    marker = list(color = death_color)
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$death_cump), 
+    #yaxis = list(title = "CCAA"),
+    xaxis = list(title = "Fallecidos"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
