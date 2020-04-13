@@ -43,14 +43,16 @@ df1 <- df_daily %>% dplyr::filter(date == max(date))
 
 
 #read the Dataset sheet into “R”.
-library("readxl")
+library(readxl)
 library(tidyverse)
 datosnombres <- read_excel("ccaanombre.xlsX")
 datospoblacion <- read_excel("poblacion.xlsx")
 datosccaa <- read.csv("https://covid19.isciii.es/resources/serie_historica_acumulados.csv")
-datosccaa <- datosccaa[-c(989),]
-datosccaa <- datosccaa[-c(990),]
-datosccaa <- datosccaa[-c(991),]
+datosccaa <- datosccaa[-c(1008),]
+datosccaa <- datosccaa[-c(1009),]
+datosccaa <- datosccaa[-c(1010),]
+datosccaa <- datosccaa[-c(1011),]
+datosccaa <- datosccaa[-c(1012),]
 datostotal <- merge(datosccaa,datosnombres,by.x="CCAA",by.y="ccaa")
 datostotall <- merge(datostotal,datospoblacion,by.x="CCAA",by.y="ccaa")
 names(datostotall)[2]<-paste("date")
@@ -63,13 +65,12 @@ datostotall[is.na(d)] <- 0
 dfccaa <- datostotall %>%
   # dplyr::filter(date == max(date)) %>%
   #dplyr::filter(Country.Region == "Spain") %>%
-  dplyr::arrange(CCAA,date) %>%
+  #dplyr::arrange(CCAA,date) %>%
   dplyr::group_by(CCAA) %>%
+  dplyr::arrange(date, .by_group = TRUE) %>%
   dplyr::mutate(
-    casos_cum = cumsum(CASOS),
-    death_cum = cumsum(Fallecidos),
-    hosp_cum= cumsum(Hospitalizados),
-    recup_cum=cumsum(Recuperados),
+    casosd = (CASOS -lag(CASOS)),
+    deathd = (Fallecidos-lag(Fallecidos))
   ) %>%
   dplyr::ungroup() 
 
@@ -77,26 +78,25 @@ dfccaa <- datostotall %>%
   
 dfccaata <- dfccaa %>%
 dplyr::filter(date == max(date)) %>%
-select(posicion, nombreccaa, CASOS, casos_cum, Fallecidos, death_cum, Hospitalizados, Recuperados, recup_cum, UCI) %>%
+select(posicion,nombreccaa,casosd,CASOS,deathd,Fallecidos,Hospitalizados,Recuperados,UCI) %>%
 dplyr::arrange(posicion) %>%
-select(nombreccaa, CASOS, casos_cum, Fallecidos, death_cum, Hospitalizados, Recuperados, recup_cum, UCI)
+select(nombreccaa, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI) 
 names(dfccaata)[1]<-paste("CCAA")
 names(dfccaata)[2]<-paste("Confirmados (últimas 24h)")
 names(dfccaata)[3]<-paste("Confirmados acumulados")
 names(dfccaata)[4]<-paste("Fallecidos (últimas 24h)")
 names(dfccaata)[5]<-paste("Fallecidos acumulados")
-names(dfccaata)[6]<-paste("Hospitalizados (últimas 24h)")
-names(dfccaata)[7]<-paste("Recuperados (últimas 24h)")
-names(dfccaata)[8]<-paste("Recuperados acumulados")
-names(dfccaata)[9]<-paste("UCI")
+names(dfccaata)[6]<-paste("Hospitalizados")
+names(dfccaata)[7]<-paste("Recuperados")
+names(dfccaata)[8]<-paste("UCI")
 
 dfccaatag <- dfccaa %>%
 dplyr::filter(date == max(date)) %>%
-select(posicion, nombreccaa, casos_cum, death_cum, poblacion) %>%
+select(posicion, nombreccaa, CASOS, Fallecidos, poblacion) %>%
 dplyr::arrange(posicion) %>%
-select(posicion, nombreccaa, casos_cum, death_cum, poblacion)
-dfccaatag$casos_cump <- dfccaatag$casos_cum/(dfccaatag$poblacion/10000)
-dfccaatag$death_cump <- dfccaatag$death_cum/(dfccaatag$poblacion/10000)
+select(nombreccaa, CASOS, Fallecidos, poblacion)
+dfccaatag$casosp<- dfccaatag$CASOS/(dfccaatag$poblacion/10000)
+dfccaatag$deathp<- dfccaatag$Fallecidos/(dfccaatag$poblacion/10000)
 
 
 
@@ -374,7 +374,7 @@ library(dplyr)
 library(formattable)
 library(tidyr)
 formattable(dfccaata, 
-            align =c("l","c","c","c","c", "c", "c", "c", "c"), 
+            align =c("l","c","c","c","c", "c", "c", "c"), 
             list(`Indicator Name` = formatter(
               "span", style = ~ style(color = "grey",font.weight = "bold"))
 ))
@@ -389,11 +389,11 @@ Column {data-width=600}
 
 ```{r}
 dfccaatag <- dfccaatag %>%
-dplyr::arrange(casos_cump)
+dplyr::arrange(casosp)
 
 plotly::plot_ly(data = dfccaatag) %>%
   plotly::add_trace(
-    x = ~casos_cump,
+    x = ~casosp,
     y = ~nombreccaa,
     type = "bar",
     orientation = 'h',
@@ -404,8 +404,8 @@ plotly::plot_ly(data = dfccaatag) %>%
   ) %>%
   plotly::layout(
     title = "",
-    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$casos_cump), 
-    #yaxis = list(title = "CCAA"),
+    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$casosp), 
+    yaxis = list(title = ""),
     xaxis = list(title = "Confirmados"),
     legend = list(x = 0.1, y = 0.9),
     hovermode = "compare"
@@ -417,11 +417,11 @@ plotly::plot_ly(data = dfccaatag) %>%
 
 ```{r}
 dfccaatag <- dfccaatag %>%
-dplyr::arrange(death_cump)
+dplyr::arrange(deathp)
 
 plotly::plot_ly(data = dfccaatag) %>%
   plotly::add_trace(
-    x = ~death_cump,
+    x = ~deathp,
     y = ~nombreccaa,
     type = "bar",
     orientation = 'h',
@@ -432,10 +432,26 @@ plotly::plot_ly(data = dfccaatag) %>%
   ) %>%
   plotly::layout(
     title = "",
-    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$death_cump), 
-    #yaxis = list(title = "CCAA"),
+    yaxis = list(categoryorder = "array", categoryarray =- dfccaatag$deathp), 
+    yaxis = list(title = ""),
     xaxis = list(title = "Fallecidos"),
     legend = list(x = 0.1, y = 0.9),
     hovermode = "compare"
   )
 ```
+
+
+Fuentes
+=======================================================================
+
+
+El presente dashboard sobre la situación del coronavirus en España se nutre de dos fuentes:
+
+1. El Centro Europeo para la Prevención y el Control de Enfermedades      (ECDC): los datos presentados para el conjunto de España proceden de    esta fuente.
+   [www.ecdc.europa.eu/en](https://www.ecdc.europa.eu/en)
+
+2. El ministrio de Sanidad: los datos por Comunidades Autónomas 
+   proceden de esta fuente.
+   [www.mscbs.gob.es/home.htm](https://www.mscbs.gob.es/home.htm)
+   
+El dashboard ha sido construido en Rstudio con el entorno R Markdown.
