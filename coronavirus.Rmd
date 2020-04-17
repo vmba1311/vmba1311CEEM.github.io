@@ -454,4 +454,5 @@ El presente dashboard sobre la situación del coronavirus en España se nutre de
    proceden de esta fuente.
    [www.mscbs.gob.es/home.htm](https://www.mscbs.gob.es/home.htm)
    
-El dashboard ha sido construido en Rstudio con el entorno R Markdown.
+El dashboard ha sido construido en Rstudio con el entorno R Markdown
+
