@@ -584,7 +584,7 @@ plotly::plot_ly(data = dfccaatam) %>%
   )
 ```
 
-### **Número de personas fallecidas, datos acumulados** (España)
+### **Número de personas fallecidas, datos acumulados** (Comunidad de Madrid)
 
 ```{r}
 plotly::plot_ly(data = dfccaatam) %>%
@@ -626,7 +626,7 @@ plotly::plot_ly(data = dfccaatam) %>%
 Column {data-width=400}
 -------------------------------------
 
-### **Casos confirmados diarios** (España)
+### **Casos confirmados diarios** (Comunidad de Madrid)
 
 ```{r}
 plotly::plot_ly(data = dfccaatam) %>%
@@ -667,7 +667,7 @@ plotly::plot_ly(data = dfccaatam) %>%
   )
 ```
 
-### **Número de personas fallecidas** (España)
+### **Número de personas fallecidas** (Comunidad de Madrid)
 
 ```{r}
 plotly::plot_ly(data = dfccaatam) %>%
