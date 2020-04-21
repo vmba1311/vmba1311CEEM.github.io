@@ -543,7 +543,7 @@ valueBox(
 Column {data-width=400}
 -------------------------------------
 
-### **Número de casos confirmados, datos acumulados** (España)
+### **Número de casos confirmados, datos acumulados** (Comunidad de Madrid)
 
 ```{r}
 plotly::plot_ly(data = dfccaatam) %>%
