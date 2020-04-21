@@ -99,7 +99,17 @@ dfccaatag$casosp<- dfccaatag$CASOS/(dfccaatag$poblacion/10000)
 dfccaatag$deathp<- dfccaatag$Fallecidos/(dfccaatag$poblacion/10000)
 
 
+dfccaatam <- dfccaa %>%
+dplyr::filter(CCAA == "MD") %>%
+filter(date > "2020-02-24") %>%
+select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI)  %>%
+dplyr::arrange(date) 
 
+dfccaatamd <- dfccaa %>%
+dplyr::filter(CCAA == "MD") %>%
+dplyr::filter(date == max(date)) %>%
+select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI)  %>%
+dplyr::arrange(date) 
 
 
 
@@ -439,6 +449,264 @@ plotly::plot_ly(data = dfccaatag) %>%
     hovermode = "compare"
   )
 ```
+
+
+Comunidad de Madrid
+=======================================================================
+
+Row {data-width=400}
+-----------------------------------------------------------------------
+
+### confirmed {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(dfccaatamd$CASOS, big.mark = ","), "", sep = " "),
+  caption = "Total casos confirmados",
+  icon = "fas fa-user-md",
+  color = confirmed_color
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### death {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(dfccaatamd$Fallecidos, big.mark = ","), " (",
+    round(100 * (dfccaatamd$Fallecidos) / (dfccaatamd$CASOS), 1),
+    "%)",
+    sep = ""
+  ),
+  caption = "Total fallecidos (tasa de mortalidad)",
+  icon = "fas fa-heart-broken",
+  color = death_color
+)
+```
+
+
+### confirmed24 {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(dfccaatamd$casosd, big.mark = ","), "", sep = " "),
+  caption = "Casos confirmados últimas 24 horas",
+  icon = "fas fa-user-md",
+  color = confirmed_color
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### death24 {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste(format(dfccaatamd$deathd, big.mark = ","), "", sep = " "),
+  caption = "Fallecidos últimas 24 horas",
+  icon = "fas fa-heart-broken",
+  color = death_color
+)
+```
+
+Column {data-width=400}
+-------------------------------------
+
+### **Número de casos confirmados, datos acumulados** (España)
+
+```{r}
+plotly::plot_ly(data = dfccaatam) %>%
+  plotly::add_trace(
+    x = ~date,
+    # y = ~active_cum,
+    y = ~CASOS,
+    type = "scatter",
+    mode = "lines+markers",
+    # name = "Active",
+    name = "casos confirmados",
+    line = list(color = active_color),
+    marker = list(color = active_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "Nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de casos confirmados"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+### **Número de personas fallecidas, datos acumulados** (España)
+
+```{r}
+plotly::plot_ly(data = dfccaatam) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~Fallecidos,
+    type = "scatter",
+    mode = "lines+markers",
+    name = "Fallecidos",
+    line = list(color = death_color),
+    marker = list(color = death_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de fallecidos"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+Column {data-width=400}
+-------------------------------------
+
+### **Casos confirmados diarios** (España)
+
+```{r}
+plotly::plot_ly(data = dfccaatam) %>%
+  plotly::add_trace(
+    x = ~date,
+    # y = ~active_cum,
+    y = ~casosd,
+    type = "bar",
+    #mode = "lines+markers",
+    # name = "Active",
+    name = "casos confirmados",
+    #bar = list(color = active_color),
+    marker = list(color = active_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "Nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de casos confirmados"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+### **Número de personas fallecidas** (España)
+
+```{r}
+plotly::plot_ly(data = dfccaatam) %>%
+  plotly::add_trace(
+    x = ~date,
+    y = ~deathd,
+    type = "bar",
+    #mode = "bar",
+    name = "Fallecidos",
+    #line = list(color = death_color),
+    marker = list(color = death_color)
+  ) %>%
+  plotly::add_annotations(
+    x = as.Date("2020-03-18"),
+    y = 14,
+    text = paste(
+      "nuevas medidas",
+      "",
+      "de confinamiento"
+    ),
+    xref = "x",
+    yref = "y",
+    arrowhead = 5,
+    arrowhead = 3,
+    arrowsize = 1,
+    showarrow = TRUE,
+    ax = -10,
+    ay = -90
+  ) %>%
+  plotly::layout(
+    title = "",
+    yaxis = list(title = "Número de fallecidos"),
+    xaxis = list(title = "Fecha"),
+    legend = list(x = 0.1, y = 0.9),
+    hovermode = "compare"
+  )
+```
+
+
 
 
 Fuentes
