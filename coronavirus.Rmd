@@ -48,11 +48,11 @@ library(tidyverse)
 datosnombres <- read_excel("ccaanombre.xlsX")
 datospoblacion <- read_excel("poblacion.xlsx")
 datosccaa <- read.csv("https://covid19.isciii.es/resources/serie_historica_acumulados.csv")
-datosccaa <- datosccaa[-c(1008),]
-datosccaa <- datosccaa[-c(1009),]
-datosccaa <- datosccaa[-c(1010),]
-datosccaa <- datosccaa[-c(1011),]
-datosccaa <- datosccaa[-c(1012),]
+datosccaa <- datosccaa[-c(1237),]
+datosccaa <- datosccaa[-c(1238),]
+datosccaa <- datosccaa[-c(1239),]
+datosccaa <- datosccaa[-c(1240),]
+datosccaa <- datosccaa[-c(1241),]
 datostotal <- merge(datosccaa,datosnombres,by.x="CCAA",by.y="ccaa")
 datostotall <- merge(datostotal,datospoblacion,by.x="CCAA",by.y="ccaa")
 names(datostotall)[2]<-paste("date")
@@ -68,6 +68,9 @@ dfccaa <- datostotall %>%
   #dplyr::arrange(CCAA,date) %>%
   dplyr::group_by(CCAA) %>%
   dplyr::arrange(date, .by_group = TRUE) %>%
+  dplyr::mutate(
+    CASOS = (CASOS +PCR.),
+  ) %>%
   dplyr::mutate(
     casosd = (CASOS -lag(CASOS)),
     deathd = (Fallecidos-lag(Fallecidos))
