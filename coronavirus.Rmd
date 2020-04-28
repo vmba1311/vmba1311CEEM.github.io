@@ -48,11 +48,13 @@ library(tidyverse)
 datosnombres <- read_excel("ccaanombre.xlsX")
 datospoblacion <- read_excel("poblacion.xlsx")
 datosccaa <- read.csv("https://covid19.isciii.es/resources/serie_historica_acumulados.csv")
-datosccaa <- datosccaa[-c(1237),]
-datosccaa <- datosccaa[-c(1238),]
-datosccaa <- datosccaa[-c(1239),]
-datosccaa <- datosccaa[-c(1240),]
-datosccaa <- datosccaa[-c(1241),]
+datosccaa <- datosccaa %>%
+dplyr::filter(FECHA != "") 
+#datosccaa <- datosccaa[-c(1237),]
+#datosccaa <- datosccaa[-c(1238),]
+#datosccaa <- datosccaa[-c(1239),]
+#datosccaa <- datosccaa[-c(1240),]
+#datosccaa <- datosccaa[-c(1241),]
 datostotal <- merge(datosccaa,datosnombres,by.x="CCAA",by.y="ccaa")
 datostotall <- merge(datostotal,datospoblacion,by.x="CCAA",by.y="ccaa")
 names(datostotall)[2]<-paste("date")
