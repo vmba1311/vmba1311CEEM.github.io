@@ -71,7 +71,7 @@ dfccaa <- datostotall %>%
   dplyr::group_by(CCAA) %>%
   dplyr::arrange(date, .by_group = TRUE) %>%
   dplyr::mutate(
-    CASOS = (CASOS +PCR.),
+  CASOS=ifelse(CASOS==0,PCR.,CASOS)
   ) %>%
   dplyr::mutate(
     casosd = (CASOS -lag(CASOS)),
@@ -79,7 +79,8 @@ dfccaa <- datostotall %>%
   ) %>%
   dplyr::ungroup() 
 
-
+    #if (CASOS==0){CASOS=PCR.}
+    #CASOS = (CASOS +PCR.),
   
 dfccaata <- dfccaa %>%
 dplyr::filter(date == max(date)) %>%
