@@ -47,7 +47,7 @@ library(readxl)
 library(tidyverse)
 datosnombres <- read_excel("ccaanombre.xlsX")
 datospoblacion <- read_excel("poblacion.xlsx")
-datosccaa <- read.csv("https://covid19.isciii.es/resources/serie_historica_acumulados.csv")
+datosccaa <- read.csv("https://cnecovid.isciii.es/covid19/resources/agregados.csv")
 datosccaa <- datosccaa %>%
 dplyr::filter(FECHA != "") 
 #datosccaa <- datosccaa[-c(1237),]
