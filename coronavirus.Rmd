@@ -71,8 +71,7 @@ dfccaa <- datostotall %>%
   dplyr::group_by(CCAA) %>%
   dplyr::arrange(date, .by_group = TRUE) %>%
   dplyr::mutate(
-  CASOS=ifelse(CASOS==0,PCR.,CASOS)
-  ) %>%
+  CASOS=PCR.)%>%
   dplyr::mutate(
     casosd = (CASOS -lag(CASOS)),
     deathd = (Fallecidos-lag(Fallecidos))
@@ -84,16 +83,15 @@ dfccaa <- datostotall %>%
   
 dfccaata <- dfccaa %>%
 dplyr::filter(date == max(date)) %>%
-select(posicion,nombreccaa,casosd,CASOS,deathd,Fallecidos,Hospitalizados,Recuperados,UCI) %>%
+select(posicion,nombreccaa,casosd,CASOS,deathd,Fallecidos,Hospitalizados,UCI) %>%
 dplyr::arrange(posicion) %>%
-select(nombreccaa, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI) 
+select(nombreccaa, casosd, CASOS, deathd, Fallecidos, Hospitalizados, UCI) 
 names(dfccaata)[1]<-paste("CCAA")
 names(dfccaata)[2]<-paste("Confirmados (últimas 24h)")
 names(dfccaata)[3]<-paste("Confirmados acumulados")
 names(dfccaata)[4]<-paste("Fallecidos (últimas 24h)")
 names(dfccaata)[5]<-paste("Fallecidos acumulados")
 names(dfccaata)[6]<-paste("Hospitalizados")
-names(dfccaata)[7]<-paste("Recuperados")
 names(dfccaata)[8]<-paste("UCI")
 
 dfccaatag <- dfccaa %>%
@@ -108,13 +106,13 @@ dfccaatag$deathp<- dfccaatag$Fallecidos/(dfccaatag$poblacion/10000)
 dfccaatam <- dfccaa %>%
 dplyr::filter(CCAA == "MD") %>%
 filter(date > "2020-02-24") %>%
-select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI)  %>%
+select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, UCI)  %>%
 dplyr::arrange(date) 
 
 dfccaatamd <- dfccaa %>%
 dplyr::filter(CCAA == "MD") %>%
 dplyr::filter(date == max(date)) %>%
-select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, Recuperados, UCI)  %>%
+select(nombreccaa, date, casosd, CASOS, deathd, Fallecidos, Hospitalizados, UCI)  %>%
 dplyr::arrange(date) 
 
 
