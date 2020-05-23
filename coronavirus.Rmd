@@ -92,7 +92,7 @@ names(dfccaata)[3]<-paste("Confirmados acumulados")
 names(dfccaata)[4]<-paste("Fallecidos (últimas 24h)")
 names(dfccaata)[5]<-paste("Fallecidos acumulados")
 names(dfccaata)[6]<-paste("Hospitalizados")
-names(dfccaata)[8]<-paste("UCI")
+names(dfccaata)[7]<-paste("UCI")
 
 dfccaatag <- dfccaa %>%
 dplyr::filter(date == max(date)) %>%
